@@ -98,7 +98,6 @@ var image = new Image();
 function messaged({data: points}) {
 	drawing_context.fillStyle = "#fff";
 	drawing_context.fillRect(0, 0, width, height);
-	drawing_context.beginPath();
 	// 	const {data: rgba} = context.getImageData(0, 0, width, height);
 	for (let i = 0, n = points.length; i < n; i += 2) {
 		let x = points[i], y = points[i + 1];
@@ -106,9 +105,10 @@ function messaged({data: points}) {
 		drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
 		// x = Math.floor(x); y = Math.floor(y);
 		// drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
+		drawing_context.fillStyle = "#000";
+		drawing_context.fill();
+		drawing_context.beginPath();
 	}
-	drawing_context.fillStyle = "#000";
-	drawing_context.fill();
 }
 
 
@@ -136,13 +136,14 @@ image.addEventListener('load', function() {
 	// 	let weight = s==0 ? (1 - v) * rgba[i * 4 + 3] : s * rgba[i * 4 + 3];
 	// 	data[i] = Math.max(0, weight);
 	// }
-	for (let i = 0, n = rgba.length / 4; i < n; ++i) data[i] = Math.max(0, 1 - rgba[i * 4] / 254);
+	// for (let i = 0, n = rgba.length / 4; i < n; ++i) data[i] = Math.max(0, 1 - rgba[i * 4] / 254);
 	for (let i = 0, n = rgba.length / 4; i < n; ++i) data[i] = Math.max(0, 1 - rgba[i * 4] / 254);
 	
 	//! data now contains the weighting
 	data.width = width;
 	data.height = height;
-	let n = Math.round(width * height / 40);
+	// let n = Math.round(width * height / 40);
+	let n = Math.round(width * height / 100);
 	const worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
 	worker.postMessage({data, width, height, n});
