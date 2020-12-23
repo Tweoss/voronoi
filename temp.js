@@ -39,7 +39,9 @@ function messaged({data: points}) {
 		drawing_context.moveTo(x + 1.5, y);
 		drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
 		// x = Math.floor(x); y = Math.floor(y);
-		// drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
+		// // drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
+		let index = (i / 2 * 3);
+		// drawing_context.fillStyle = `rgb(${Math.floor(outputrgba[index])},${Math.floor(outputrgba[index + 1])},${Math.floor(outputrgba[index + 2])})`;
 		drawing_context.fillStyle = "#000";
 		drawing_context.fill();
 		drawing_context.beginPath();

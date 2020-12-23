@@ -83,6 +83,7 @@ onmessage = event => {
 	
 	let density = new Float64Array(width*height);
 	let outputrgba = new Float64Array(n*3);
+	let count_per_cell = new Array(n);
 
 	//* set the density at each pixel
 	for (let i = 0; i < density.length; i++) {
@@ -122,6 +123,7 @@ onmessage = event => {
 				// outputrgba[i * 3] += rgba[i * 4]
 				// outputrgba[i * 3 + 1] += rgba[i * 4 + 1]
 				// outputrgba[i * 3 + 2] += rgba[i * 4 + 2]
+				// count_per_cell[i]++;
 			}
 		}
 
@@ -138,6 +140,10 @@ onmessage = event => {
 			//* w is the weight of the cell, so if there is a higher contentration or if there is a larger cell
 			points[i * 2] = x0 + (x1 - x0) * 1.8 + (Math.random() - 0.5) * w;
 			points[i * 2 + 1] = y0 + (y1 - y0) * 1.8 + (Math.random() - 0.5) * w;
+			//* determine the avg color of the cell
+			// outputrgba[i * 3] /= count_per_cell[i];
+			// outputrgba[i * 3 + 1] /= count_per_cell[i];
+			// outputrgba[i * 3 + 2] /= count_per_cell[i];
 		}
 
 		postMessage(points);
