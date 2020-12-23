@@ -1,4 +1,4 @@
-{/* <script src="https://cdn.jsdelivr.net/npm/d3-require@1"></script> */}
+
 
 importScripts('./node_modules/d3-delaunay/dist/d3-delaunay.js');
 // import {Delaunay} from "d3-delaunay";
