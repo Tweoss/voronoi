@@ -72,14 +72,14 @@ image.addEventListener('load', function() {
 	// for (let i = 0, n = rgba.length / 4; i < n; ++i) rgba[i * 4] = Math.max(0, 1 - rgba[i * 4] / 254);
 	//! data now contains the weighting
 	//! floatrgba SHOULD not be touched
-	// let n = Math.round(width * height / 40);
-	let n = Math.round(width * height / 100);
+	let n = Math.round(width * height / 40);
+	// let n = Math.round(width * height / 100);
 	const worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
 	worker.postMessage({rgba, width, height, n});
 	// worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './imgs/Template_1.png'; // Set source path
+image.src = './imgs/obama.png'; // Set source path
 
 
 

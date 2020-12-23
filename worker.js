@@ -88,10 +88,11 @@ onmessage = event => {
 
 	//* set the density at each pixel
 	for (let i = 0; i < density.length; i++) {
-		const {h,s,v} = rgbToHsv(rgba[i * 4], rgba[i*4 + 1], rgba[i*4 + 2])
+		const [h,s,v] = rgbToHsv(rgba[i * 4], rgba[i*4 + 1], rgba[i*4 + 2])
 		// const {h,s,v} = rgbToHsv(floatrgba[i * 4], floatrgba[i*4 + 1], floatrgba[i*4 + 2])
 		density[i] = s * v + (1-v);
 	}
+	console.log(density)
 	//* initialize the points using rejection sampling.
 	for (let i = 0; i < n; ++i) {
 		for (let j = 0; j < 30; ++j) {
