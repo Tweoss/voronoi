@@ -1,71 +1,5 @@
 'use strict';
 
-/**
- * Converts an RGB color value to HSV. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and v in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSV representation
- */
-function rgbToHsv(r, g, b) {
-r /= 255, g /= 255, b /= 255;
-
-var max = Math.max(r, g, b), min = Math.min(r, g, b);
-var h, s, v = max;
-
-var d = max - min;
-s = max == 0 ? 0 : d / max;
-
-if (max == min) {
-	h = 0; // achromatic
-} else {
-	switch (max) {
-	case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-	case g: h = (b - r) / d + 2; break;
-	case b: h = (r - g) / d + 4; break;
-	}
-
-	h /= 6;
-}
-
-return [ h, s, v ];
-}
-
-/**
- * Converts an HSV color value to RGB. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
- * Assumes h, s, and v are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 255].
- *
- * @param   Number  h       The hue
- * @param   Number  s       The saturation
- * @param   Number  v       The value
- * @return  Array           The RGB representation
- */
-function hsvToRgb(h, s, v) {
-var r, g, b;
-
-var i = Math.floor(h * 6);
-var f = h * 6 - i;
-var p = v * (1 - s);
-var q = v * (1 - f * s);
-var t = v * (1 - (1 - f) * s);
-
-switch (i % 6) {
-	case 0: r = v, g = t, b = p; break;
-	case 1: r = q, g = v, b = p; break;
-	case 2: r = p, g = v, b = t; break;
-	case 3: r = p, g = q, b = v; break;
-	case 4: r = t, g = p, b = v; break;
-	case 5: r = v, g = p, b = q; break;
-}
-
-return [ r * 255, g * 255, b * 255 ];
-}
 
 //? 1
 var drawing_canvas = document.createElement("canvas");
@@ -95,7 +29,8 @@ function resized() {
 var image = new Image();  
 
 //? 5
-function messaged({data: points}) {
+// function messaged({data: points}) {
+function messaged({data: {points, outputrgba}}) {
 	drawing_context.fillStyle = "#fff";
 	drawing_context.fillRect(0, 0, width, height);
 	// 	const {data: rgba} = context.getImageData(0, 0, width, height);
@@ -104,8 +39,10 @@ function messaged({data: points}) {
 		drawing_context.moveTo(x + 1.5, y);
 		drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
 		// x = Math.floor(x); y = Math.floor(y);
-		// drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
-		drawing_context.fillStyle = "#000";
+		// // drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
+		let index = (i / 2 * 3);
+		drawing_context.fillStyle = `rgb(${Math.floor(outputrgba[index])},${Math.floor(outputrgba[index + 1])},${Math.floor(outputrgba[index + 2])})`;
+		// drawing_context.fillStyle = "#000";
 		drawing_context.fill();
 		drawing_context.beginPath();
 	}
@@ -116,7 +53,6 @@ function messaged({data: points}) {
 image.addEventListener('load', function() {
 	width = document.body.clientWidth;
 	height = Math.round(width * image.height / image.width);
-	var data = new Float64Array(width * height);
 	append_canvas();
 	window.addEventListener("resize", resized);
 	
@@ -130,25 +66,20 @@ image.addEventListener('load', function() {
 	context.scale(1, 1);
 	context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
 	const {data: rgba} = context.getImageData(0, 0, width, height);
-	var h,s,v;
-	// for (let i = 0, n = rgba.length / 4; i < n; ++i) {
-	// 	[h,s,v] = rgbToHsv(rgba[i*4],rgba[i*4 + 1],rgba[i*4 + 2]);
-	// 	let weight = s==0 ? (1 - v) * rgba[i * 4 + 3] : s * rgba[i * 4 + 3];
-	// 	data[i] = Math.max(0, weight);
-	// }
-	// for (let i = 0, n = rgba.length / 4; i < n; ++i) data[i] = Math.max(0, 1 - rgba[i * 4] / 254);
-	for (let i = 0, n = rgba.length / 4; i < n; ++i) data[i] = Math.max(0, 1 - rgba[i * 4] / 254);
 	
+	// let floatrgba = Array.from(rgba);
+	// for (let i = 0, m = floatrgba.length / 4; i < m; ++i) floatrgba[i * 4] = Math.max(0, 1 - floatrgba[i * 4] / 254);
+	// for (let i = 0, n = rgba.length / 4; i < n; ++i) rgba[i * 4] = Math.max(0, 1 - rgba[i * 4] / 254);
 	//! data now contains the weighting
-	data.width = width;
-	data.height = height;
-	// let n = Math.round(width * height / 40);
-	let n = Math.round(width * height / 100);
+	//! floatrgba SHOULD not be touched
+	let n = Math.round(width * height / 40);
+	// let n = Math.round(width * height / 100);
 	const worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
-	worker.postMessage({data, width, height, n});
+	worker.postMessage({rgba, width, height, n});
+	// worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './IMG_2319 copy.jpg'; // Set source path
+image.src = './imgs/obama.png'; // Set source path
 
 
 
