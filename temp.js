@@ -29,8 +29,8 @@ function resized() {
 var image = new Image();  
 
 //? 5
-function messaged({data: points}) {
-// function messaged({data: {points, outputrgba}}) {
+// function messaged({data: points}) {
+function messaged({data: {points, outputrgba}}) {
 	drawing_context.fillStyle = "#fff";
 	drawing_context.fillRect(0, 0, width, height);
 	// 	const {data: rgba} = context.getImageData(0, 0, width, height);
@@ -41,8 +41,8 @@ function messaged({data: points}) {
 		// x = Math.floor(x); y = Math.floor(y);
 		// // drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
 		let index = (i / 2 * 3);
-		// drawing_context.fillStyle = `rgb(${Math.floor(outputrgba[index])},${Math.floor(outputrgba[index + 1])},${Math.floor(outputrgba[index + 2])})`;
-		drawing_context.fillStyle = "#000";
+		drawing_context.fillStyle = `rgb(${Math.floor(outputrgba[index])},${Math.floor(outputrgba[index + 1])},${Math.floor(outputrgba[index + 2])})`;
+		// drawing_context.fillStyle = "#000";
 		drawing_context.fill();
 		drawing_context.beginPath();
 	}
@@ -67,8 +67,8 @@ image.addEventListener('load', function() {
 	context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
 	const {data: rgba} = context.getImageData(0, 0, width, height);
 	
-	let floatrgba = Array.from(rgba);
-	for (let i = 0, m = floatrgba.length / 4; i < m; ++i) floatrgba[i * 4] = Math.max(0, 1 - floatrgba[i * 4] / 254);
+	// let floatrgba = Array.from(rgba);
+	// for (let i = 0, m = floatrgba.length / 4; i < m; ++i) floatrgba[i * 4] = Math.max(0, 1 - floatrgba[i * 4] / 254);
 	// for (let i = 0, n = rgba.length / 4; i < n; ++i) rgba[i * 4] = Math.max(0, 1 - rgba[i * 4] / 254);
 	//! data now contains the weighting
 	//! floatrgba SHOULD not be touched
@@ -76,8 +76,8 @@ image.addEventListener('load', function() {
 	let n = Math.round(width * height / 100);
 	const worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
-	// worker.postMessage({rgba, width, height, n});
-	worker.postMessage({floatrgba, width, height, n});
+	worker.postMessage({rgba, width, height, n});
+	// worker.postMessage({floatrgba, width, height, n});
 }, false);
 image.src = './imgs/Template_1.png'; // Set source path
 
