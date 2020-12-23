@@ -72,26 +72,31 @@ function hsvToRgb(h, s, v) {
 importScripts('./node_modules/d3-delaunay/dist/d3-delaunay.js');
 
 onmessage = event => {
-	// const {data: {data, width, height, n}} = event;
+	// const {data: {rgba, width, height, n}} = event;
 	const { data: { floatrgba, width, height, n } } = event;
+	//* Old centroid of the cell
 	const points = new Float64Array(n * 2); //* coordinates of the points
-	let weight = new Float64Array(width*height);
-	const colors = new Uint8ClampedArray(n * 3); //* colors for each point
-	const c = new Float64Array(n * 2); //* coordinates of the centroid? 
-	const s = new Float64Array(n); //* color of the cell?
+	//* New centroid of the cell
+	const centroid = new Float64Array(n * 2); //* coordinates of the centroid? 
+	//* Weight of the cell
+	const weight = new Float64Array(n); //* color of the cell?
+	
+	let density = new Float64Array(width*height);
+	let outputrgba = new Float64Array(n*3);
 
-	// Initialize the points using rejection sampling.
+	//* set the density at each pixel
+	for (let i = 0; i < density.length; i++) {
+		const {h,s,v} = rgbToHsv(floatrgba[i * 4], floatrgba[i*4 + 1], floatrgba[i*4 + 2])
+		density[i] = s * v + (1-v);
+	}
+	//* initialize the points using rejection sampling.
 	for (let i = 0; i < n; ++i) {
 		for (let j = 0; j < 30; ++j) {
 			const x = points[i * 2] = Math.floor(Math.random() * width);
 			const y = points[i * 2 + 1] = Math.floor(Math.random() * height);
-			// if (Math.random() < data[y * width + x]) break;
+			// if (Math.random() < density[y * width + x]) break;
 			if (Math.random() < floatrgba[(y * width + x) * 4]) break;
 		}
-	}
-	for (let i = 0; i < weight.length; i++) {
-		const {h,s,v} = rgbToHsv(floatrgba[i * 4], floatrgba[i*4 + 1], floatrgba[i*4 + 2])
-		weight[i] = s * v + (1-v);
 	}
 
 	const delaunay = new d3.Delaunay(points);
@@ -100,22 +105,23 @@ onmessage = event => {
 	//* k is # of iterations
 	for (let k = 0; k < 80; ++k) {
 		// Compute the weighted centroid for each Voronoi cell.
-		c.fill(0);
-		s.fill(0);
+		centroid.fill(0);
+		weight.fill(0);
 		for (let y = 0, i = 0; y < height; ++y) {
 			for (let x = 0; x < width; ++x) {
 				//* w is the weight (red color) of that pixel
 				//! CHANGE THIS WEIGHTING
 				//! Saturation * Value + (1-Value)
-				// const w = data[y * width + x];
-				const w = floatrgba[(y * width + x) * 4];
+				// const w = density[y * width + x];
+				const pixelweight = floatrgba[(y * width + x) * 4];
 				//* i is index of the closest point
 				i = delaunay.find(x + 0.5, y + 0.5, i);
-				//* s is the weight of the closest point
-				s[i] += w;
-				//* c is the centroid's x and y coords
-				c[i * 2] += w * (x + 0.5);
-				c[i * 2 + 1] += w * (y + 0.5);
+				weight[i] += pixelweight;
+				centroid[i * 2] += pixelweight * (x + 0.5);
+				centroid[i * 2 + 1] += pixelweight * (y + 0.5);
+				// outputrgba[i * 3] += rgba[i * 4]
+				// outputrgba[i * 3 + 1] += rgba[i * 4 + 1]
+				// outputrgba[i * 3 + 2] += rgba[i * 4 + 2]
 			}
 		}
 
@@ -127,7 +133,7 @@ onmessage = event => {
 			const x0 = points[i * 2], y0 = points[i * 2 + 1];
 			//* if there is some color inside the cell, divide the "centroid" by its weight to get center of mass
 			//* otherwise set x1 to x0 and y1 to y0
-			const x1 = s[i] ? c[i * 2] / s[i] : x0, y1 = s[i] ? c[i * 2 + 1] / s[i] : y0;
+			const x1 = weight[i] ? centroid[i * 2] / weight[i] : x0, y1 = weight[i] ? centroid[i * 2 + 1] / weight[i] : y0;
 			//* 1.8 = 1.8 times the speed for convergence, can be adjusted
 			//* w is the weight of the cell, so if there is a higher contentration or if there is a larger cell
 			points[i * 2] = x0 + (x1 - x0) * 1.8 + (Math.random() - 0.5) * w;

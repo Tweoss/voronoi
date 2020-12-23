@@ -30,6 +30,7 @@ var image = new Image();
 
 //? 5
 function messaged({data: points}) {
+// function messaged({data: {points, outputrgba}}) {
 	drawing_context.fillStyle = "#fff";
 	drawing_context.fillRect(0, 0, width, height);
 	// 	const {data: rgba} = context.getImageData(0, 0, width, height);
@@ -50,7 +51,6 @@ function messaged({data: points}) {
 image.addEventListener('load', function() {
 	width = document.body.clientWidth;
 	height = Math.round(width * image.height / image.width);
-	var data = new Float64Array(width * height);
 	append_canvas();
 	window.addEventListener("resize", resized);
 	
@@ -64,27 +64,20 @@ image.addEventListener('load', function() {
 	context.scale(1, 1);
 	context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
 	const {data: rgba} = context.getImageData(0, 0, width, height);
-	var h,s,v;
-	// for (let i = 0, n = rgba.length / 4; i < n; ++i) {
-	// 	[h,s,v] = rgbToHsv(rgba[i*4],rgba[i*4 + 1],rgba[i*4 + 2]);
-	// 	let weight = s==0 ? (1 - v) * rgba[i * 4 + 3] : s * rgba[i * 4 + 3];
-	// 	data[i] = Math.max(0, weight);
-	// }
+	
 	let floatrgba = Array.from(rgba);
-	for (let i = 0, n = floatrgba.length / 4; i < n; ++i) floatrgba[i * 4] = Math.max(0, 1 - floatrgba[i * 4] / 254);
+	for (let i = 0, m = floatrgba.length / 4; i < m; ++i) floatrgba[i * 4] = Math.max(0, 1 - floatrgba[i * 4] / 254);
 	// for (let i = 0, n = rgba.length / 4; i < n; ++i) rgba[i * 4] = Math.max(0, 1 - rgba[i * 4] / 254);
-	console.log(floatrgba[7461 * 4])
 	//! data now contains the weighting
-	data.width = width;
-	data.height = height;
+	//! floatrgba SHOULD not be touched
 	// let n = Math.round(width * height / 40);
 	let n = Math.round(width * height / 100);
 	const worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
-	// worker.postMessage({data, width, height, n});
+	// worker.postMessage({rgba, width, height, n});
 	worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './image0.jpg'; // Set source path
+image.src = './imgs/Template_1.png'; // Set source path
 
 
 
