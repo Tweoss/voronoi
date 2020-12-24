@@ -85,7 +85,7 @@ onmessage = event => {
 
 	//* set the density at each pixel
 	for (let i = 0; i < density.length; i++) {
-		const [h,s,v] = rgbToHsv(rgba[i * 4], rgba[i*4 + 1], rgba[i*4 + 2])
+		const [ ,s,v] = rgbToHsv(rgba[i * 4], rgba[i*4 + 1], rgba[i*4 + 2])
 		density[i] = s * v + (1-v);
 	}
 

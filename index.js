@@ -135,4 +135,4 @@ image.addEventListener('load', function() {
 	worker.postMessage({rgba, width, height, n});
 	// worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './imgs/IMG_1886.JPG'; // Set source path
+image.src = './imgs/IMG_2345.jpeg'; // Set source path
