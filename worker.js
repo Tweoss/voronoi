@@ -67,7 +67,7 @@ function hsvToRgb(h, s, v) {
 }
 
 
-importScripts('./node_modules/d3-delaunay/dist/d3-delaunay.min.js');
+importScripts('./static/d3-delaunay.min.js');
 
 onmessage = event => {
 	const {data: {rgba, width, height, n}} = event;
