@@ -1,5 +1,3 @@
-{/* <script src="https://cdn.jsdelivr.net/npm/d3-require@1"></script> */ }
-
 
 /**
  * Converts an RGB color value to HSV. Conversion formula
@@ -73,7 +71,6 @@ importScripts('./node_modules/d3-delaunay/dist/d3-delaunay.js');
 
 onmessage = event => {
 	const {data: {rgba, width, height, n}} = event;
-	// const { data: { floatrgba, width, height, n } } = event;
 	//* Old centroid of the cell
 	const points = new Float64Array(n * 2); //* coordinates of the points
 	points.length = n*2;
@@ -89,17 +86,15 @@ onmessage = event => {
 	//* set the density at each pixel
 	for (let i = 0; i < density.length; i++) {
 		const [h,s,v] = rgbToHsv(rgba[i * 4], rgba[i*4 + 1], rgba[i*4 + 2])
-		// const {h,s,v} = rgbToHsv(floatrgba[i * 4], floatrgba[i*4 + 1], floatrgba[i*4 + 2])
 		density[i] = s * v + (1-v);
 	}
-	console.log(density)
+
 	//* initialize the points using rejection sampling.
 	for (let i = 0; i < n; ++i) {
 		for (let j = 0; j < 30; ++j) {
 			const x = points[i * 2] = Math.floor(Math.random() * width);
 			const y = points[i * 2 + 1] = Math.floor(Math.random() * height);
 			if (Math.random() < density[y * width + x]) break;
-			// if (Math.random() < floatrgba[(y * width + x) * 4]) break;
 		}
 	}
 
@@ -108,7 +103,6 @@ onmessage = event => {
 
 	//* k is # of iterations
 	for (let k = 0; k < 80; ++k) {
-		// Compute the weighted centroid for each Voronoi cell.
 		centroid.fill(0);
 		weight.fill(0);
 		count_per_cell.fill(0);
@@ -116,10 +110,8 @@ onmessage = event => {
 		for (let y = 0, i = 0; y < height; ++y) {
 			for (let x = 0; x < width; ++x) {
 				//* w is the weight (red color) of that pixel
-				//! CHANGE THIS WEIGHTING
-				//! Saturation * Value + (1-Value)
+				//* Saturation * Value + (1-Value)
 				const pixelweight = density[y * width + x];
-				// const pixelweight = floatrgba[(y * width + x) * 4];
 				//* i is index of the closest point
 				i = delaunay.find(x + 0.5, y + 0.5, i);
 				weight[i] += pixelweight;
@@ -157,4 +149,3 @@ onmessage = event => {
 
 	close();
 };
-// });

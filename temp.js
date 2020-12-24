@@ -68,7 +68,6 @@ function hsvToRgb(h, s, v) {
 }
 
 
-//? 1
 var drawing_canvas = document.createElement("canvas");
 const drawing_context = drawing_canvas.getContext("2d");
 var canvas = document.createElement("canvas");
@@ -77,14 +76,11 @@ document.body.appendChild(drawing_canvas);
 
 
 function append_canvas() {
-	
 	var dpi = window.devicePixelRatio;
 	drawing_canvas.width = width * dpi;
 	drawing_canvas.height = height * dpi;
 	drawing_canvas.style.width = width + "px";
 	drawing_context.scale(dpi, dpi);
-	
-	//? 2
 }
 
 
@@ -95,21 +91,15 @@ function resized() {
 }
 var image = new Image();  
 
-//? 5
-// function messaged({data: points}) {
 function messaged({data: {points, outputrgba}}) {
 	drawing_context.fillStyle = "#fff";
 	drawing_context.fillRect(0, 0, width, height);
-	// 	const {data: rgba} = context.getImageData(0, 0, width, height);
 	for (let i = 0, n = points.length; i < n; i += 2) {
 		let x = points[i], y = points[i + 1];
 		drawing_context.moveTo(x + 1.5, y);
 		drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
-		// x = Math.floor(x); y = Math.floor(y);
-		// // drawing_context.fillStyle = "#" + rgba[x + y * width] + rgba[x + y * width + 1] + rgba[x + y * width + 2];
 		let index = (i / 2 * 3);
 		let [hue, saturation, value] = rgbToHsv(Math.floor(outputrgba[index]),Math.floor(outputrgba[index + 1]),Math.floor(outputrgba[index + 2]));
-		// console.log(saturation);
 		let r,g,b;
 		if (saturation == 0) {
 			r = value * 255; g = value * 255; b = value * 255;
@@ -117,47 +107,35 @@ function messaged({data: {points, outputrgba}}) {
 		else {
 			[r,g,b] = hsvToRgb(hue, 1. , value);
 		}
-		// c.fillStyle = 'hsv('+ 360*Math.random() +',100%,50%)';
-		// let [r,g,b] = hsvToRgb(hue, saturation ? 1. : 0., value);
 		drawing_context.fillStyle = `rgb(${r},${g},${b})`;
-		// drawing_context.fillStyle = "#000";
 		drawing_context.fill();
 		drawing_context.beginPath();
 	}
 }
 
 
-//? 3
 image.addEventListener('load', function() {
 	width = document.body.clientWidth;
 	height = Math.round(width * image.height / image.width);
 	append_canvas();
 	window.addEventListener("resize", resized);
 	
-	// const context = DOM.context2d(width, height, 1);
 	canvas.width = width;
 	canvas.height = height;
-
-	
 
 	canvas.style.width = width + "px";
 	context.scale(1, 1);
 	context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
 	const {data: rgba} = context.getImageData(0, 0, width, height);
 	
-	// let floatrgba = Array.from(rgba);
-	// for (let i = 0, m = floatrgba.length / 4; i < m; ++i) floatrgba[i * 4] = Math.max(0, 1 - floatrgba[i * 4] / 254);
-	// for (let i = 0, n = rgba.length / 4; i < n; ++i) rgba[i * 4] = Math.max(0, 1 - rgba[i * 4] / 254);
-	//! data now contains the weighting
-	//! floatrgba SHOULD not be touched
-	// let n = Math.round(width * height / 600);
-	let n = Math.round(width * height / 40);
+	//* n is the number of points
+	let n = Math.round(width * height / 400);
 	const worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
 	worker.postMessage({rgba, width, height, n});
 	// worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './imgs/IMG_2319 copy.jpg'; // Set source path
+image.src = './imgs/obama.png'; // Set source path
 
 
 
