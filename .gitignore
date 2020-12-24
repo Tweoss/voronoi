@@ -1,14 +1,10 @@
 IMG_2319 copy.jpg
-inspector.css
 obama.png
 package-lock.json
 package.json
 README.md
 .vscode/launch.json
-node_modules/d3-delaunay/LICENSE
-node_modules/d3-delaunay/package.json
 node_modules/d3-delaunay/README.md
-node_modules/d3-delaunay/dist/d3-delaunay.js
 node_modules/d3-delaunay/dist/d3-delaunay.min.js
 node_modules/d3-delaunay/src/delaunay.js
 node_modules/d3-delaunay/src/index.js
