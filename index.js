@@ -91,6 +91,10 @@ function resized() {
 }
 var image = new Image();  
 
+function new_image() {
+
+}
+
 function messaged({data: {points, outputrgba}}) {
 	drawing_context.fillStyle = "#fff";
 	drawing_context.fillRect(0, 0, width, height);
@@ -113,8 +117,7 @@ function messaged({data: {points, outputrgba}}) {
 	}
 }
 
-
-image.addEventListener('load', function() {
+function call_worker() {
 	width = document.body.clientWidth;
 	height = Math.round(width * image.height / image.width);
 	append_canvas();
@@ -127,12 +130,41 @@ image.addEventListener('load', function() {
 	context.scale(1, 1);
 	context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
 	const {data: rgba} = context.getImageData(0, 0, width, height);
-	
+	return rgba;
+}
+
+image.addEventListener('load', function() {
+	let rgba = call_worker();
 	//* n is the number of points
 	let n = Math.round(width * height / 40);
-	const worker = new Worker('worker.js');
+	let worker = new Worker('worker.js');
 	worker.addEventListener("message", messaged);
 	worker.postMessage({rgba, width, height, n});
+	const inputElement = document.getElementById("photo");
+	inputElement.addEventListener("change", function handler() {
+		var file    = inputElement.files[0];
+		var reader  = new FileReader();
+		if (file) {
+			this.removeEventListener('load', handler);
+			reader.readAsDataURL(file);
+			reader.onloadend = function () {
+				image.src = reader.result;
+			}
+			image.onload = function () {
+				rgba = call_worker();
+				worker.terminate();
+				n = Math.round(width * height / 40);
+				// image = this.files[0];
+				worker = new Worker('worker.js');
+				// worker.addEventListener("message", messaged);
+				worker.postMessage({rgba, width, height, n});
+			}
+		
+		  
+		} else {
+			image.src = "";
+		}
+	}, false);
 	// worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './imgs/IMG_2345.jpeg'; // Set source path
+image.src = './imgs/obama.png'; // Set source path
