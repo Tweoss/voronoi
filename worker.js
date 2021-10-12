@@ -143,7 +143,9 @@ onmessage = event => {
 			outputrgba[i * 3 + 2] /= count_per_cell[i];
 		}
 
-		postMessage({points,outputrgba});
+		if (k%10 == 0) {
+		    postMessage({points,outputrgba});
+		}
 		voronoi.update();
 	}
 

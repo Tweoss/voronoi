@@ -12,27 +12,34 @@
  * @return  Array           The HSV representation
  */
 function rgbToHsv(r, g, b) {
-	r /= 255, g /= 255, b /= 255;
+    r /= 255, g /= 255, b /= 255;
 
-	var max = Math.max(r, g, b), min = Math.min(r, g, b);
-	var h, s, v = max;
+    var max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    var h, s, v = max;
 
-	var d = max - min;
-	s = max == 0 ? 0 : d / max;
+    var d = max - min;
+    s = max == 0 ? 0 : d / max;
 
-	if (max == min) {
-		h = 0; // achromatic
-	} else {
-		switch (max) {
-			case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-			case g: h = (b - r) / d + 2; break;
-			case b: h = (r - g) / d + 4; break;
-		}
+    if (max == min) {
+        h = 0; // achromatic
+    } else {
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
+        }
 
-		h /= 6;
-	}
+        h /= 6;
+    }
 
-	return [h, s, v];
+    return [h, s, v];
 }
 
 /**
@@ -47,124 +54,139 @@ function rgbToHsv(r, g, b) {
  * @return  Array           The RGB representation
  */
 function hsvToRgb(h, s, v) {
-	var r, g, b;
+    var r, g, b;
 
-	var i = Math.floor(h * 6);
-	var f = h * 6 - i;
-	var p = v * (1 - s);
-	var q = v * (1 - f * s);
-	var t = v * (1 - (1 - f) * s);
+    var i = Math.floor(h * 6);
+    var f = h * 6 - i;
+    var p = v * (1 - s);
+    var q = v * (1 - f * s);
+    var t = v * (1 - (1 - f) * s);
 
-	switch (i % 6) {
-		case 0: r = v, g = t, b = p; break;
-		case 1: r = q, g = v, b = p; break;
-		case 2: r = p, g = v, b = t; break;
-		case 3: r = p, g = q, b = v; break;
-		case 4: r = t, g = p, b = v; break;
-		case 5: r = v, g = p, b = q; break;
-	}
+    switch (i % 6) {
+        case 0:
+            r = v, g = t, b = p;
+            break;
+        case 1:
+            r = q, g = v, b = p;
+            break;
+        case 2:
+            r = p, g = v, b = t;
+            break;
+        case 3:
+            r = p, g = q, b = v;
+            break;
+        case 4:
+            r = t, g = p, b = v;
+            break;
+        case 5:
+            r = v, g = p, b = q;
+            break;
+    }
 
-	return [r * 255, g * 255, b * 255];
+    return [r * 255, g * 255, b * 255];
 }
 
 
 var drawing_canvas = document.createElement("canvas");
 const drawing_context = drawing_canvas.getContext("2d");
 var canvas = document.createElement("canvas");
-const context = canvas.getContext("2d");  
+const context = canvas.getContext("2d");
 document.body.appendChild(drawing_canvas);
 
 
 function append_canvas() {
-	var dpi = window.devicePixelRatio;
-	drawing_canvas.width = width * dpi;
-	drawing_canvas.height = height * dpi;
-	drawing_canvas.style.width = width + "px";
-	drawing_context.scale(dpi, dpi);
+    var dpi = window.devicePixelRatio;
+    drawing_canvas.width = width * dpi;
+    drawing_canvas.height = height * dpi;
+    drawing_canvas.style.width = width + "px";
+    drawing_context.scale(dpi, dpi);
 }
 
 
 var width, height;
+
 function resized() {
-	var w = document.body.clientWidth;
-	if (w !== width) width = w;
+    var w = document.body.clientWidth;
+    if (w !== width) width = w;
 }
-var image = new Image();  
+var image = new Image();
 
 function new_image() {
 
 }
 
-function messaged({data: {points, outputrgba}}) {
-	drawing_context.fillStyle = "#fff";
-	drawing_context.fillRect(0, 0, width, height);
-	for (let i = 0, n = points.length; i < n; i += 2) {
-		let x = points[i], y = points[i + 1];
-		drawing_context.moveTo(x + 1.5, y);
-		drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
-		let index = (i / 2 * 3);
-		let [hue, saturation, value] = rgbToHsv(Math.floor(outputrgba[index]),Math.floor(outputrgba[index + 1]),Math.floor(outputrgba[index + 2]));
-		let r,g,b;
-		if (saturation == 0) {
-			r = value * 255; g = value * 255; b = value * 255;
-		}
-		else {
-			[r,g,b] = hsvToRgb(hue, 1. , value);
-		}
-		drawing_context.fillStyle = `rgb(${r},${g},${b})`;
-		drawing_context.fill();
-		drawing_context.beginPath();
-	}
+function messaged({ data: { points, outputrgba } }) {
+    drawing_context.fillStyle = "#fff";
+    drawing_context.fillRect(0, 0, width, height);
+    for (let i = 0, n = points.length; i < n; i += 2) {
+        let x = points[i],
+            y = points[i + 1];
+        drawing_context.moveTo(x + 1.5, y);
+        drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
+        let index = (i / 2 * 3);
+        let [hue, saturation, value] = rgbToHsv(Math.floor(outputrgba[index]), Math.floor(outputrgba[index + 1]), Math.floor(outputrgba[index + 2]));
+        let r, g, b;
+        if (saturation == 0) {
+            r = value * 255;
+            g = value * 255;
+            b = value * 255;
+        } else {
+            [r, g, b] = hsvToRgb(hue, 1., value);
+        }
+        drawing_context.fillStyle = `rgb(${r},${g},${b})`;
+        drawing_context.fill();
+        drawing_context.beginPath();
+    }
 }
 
 function call_worker() {
-	width = document.body.clientWidth;
-	height = Math.round(width * image.height / image.width);
-	append_canvas();
-	window.addEventListener("resize", resized);
-	
-	canvas.width = width;
-	canvas.height = height;
+    width = document.body.clientWidth;
+    height = Math.round(width * image.height / image.width);
+    append_canvas();
+    window.addEventListener("resize", resized);
 
-	canvas.style.width = width + "px";
-	context.scale(1, 1);
-	context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
-	const {data: rgba} = context.getImageData(0, 0, width, height);
-	return rgba;
+    canvas.width = width;
+    canvas.height = height;
+
+    canvas.style.width = width + "px";
+    context.scale(1, 1);
+    context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
+    const { data: rgba } = context.getImageData(0, 0, width, height);
+    return rgba;
 }
 
 image.addEventListener('load', function() {
-	let rgba = call_worker();
-	//* n is the number of points
-	let n = Math.round(width * height / 40);
-	let worker = new Worker('worker.js');
-	worker.addEventListener("message", messaged);
-	worker.postMessage({rgba, width, height, n});
-	const inputElement = document.getElementById("photo");
-	inputElement.addEventListener("change", function handler() {
-		var file    = inputElement.files[0];
-		var reader  = new FileReader();
-		if (file) {
-			this.removeEventListener('load', handler);
-			reader.readAsDataURL(file);
-			reader.onloadend = function () {
-				image.src = reader.result;
-			}
-			image.onload = function () {
-				rgba = call_worker();
-				worker.terminate();
-				n = Math.round(width * height / 40);
-				// image = this.files[0];
-				worker = new Worker('worker.js');
-				// worker.addEventListener("message", messaged);
-				worker.postMessage({rgba, width, height, n});
-			}
-		
-		  
-		} else {
-			image.src = "";
-		}
-	}, false);
-	// worker.postMessage({floatrgba, width, height, n});
+    let rgba = call_worker();
+    //* n is the number of points
+    let n = Math.round(width * height / 160);
+    let worker = new Worker('worker.js');
+    worker.addEventListener("message", messaged);
+    worker.postMessage({ rgba, width, height, n });
+    const inputElement = document.getElementById("photo");
+    inputElement.addEventListener("change", function handler() {
+        var file = inputElement.files[0];
+        var reader = new FileReader();
+        if (file) {
+            this.removeEventListener('load', handler);
+            reader.readAsDataURL(file);
+            reader.onloadend = function() {
+                image.src = reader.result;
+            }
+            image.onload = function() {
+                rgba = call_worker();
+                worker.terminate();
+                n = Math.round(width * height / 160);
+                // image = this.files[0];
+                worker = new Worker('worker.js');
+                // worker.addEventListener("message", messaged);
+                worker.postMessage({ rgba, width, height, n });
+            }
+
+
+        } else {
+            image.src = "";
+        }
+    }, false);
+    // worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './imgs/obama.png'; // Set source path
+image.src = './imgs/bell.png'; // Set source path
