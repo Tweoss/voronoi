@@ -86,7 +86,6 @@ function hsvToRgb(h, s, v) {
     return [r * 255, g * 255, b * 255];
 }
 
-
 var drawing_canvas = document.createElement("canvas");
 const drawing_context = drawing_canvas.getContext("2d");
 var canvas = document.createElement("canvas");
@@ -102,8 +101,12 @@ function append_canvas() {
     drawing_context.scale(dpi, dpi);
 }
 
-
 var width, height;
+var concentration = 50,
+    bubble = false;
+const PIXELS_SQUARE_SCALE = 1 / 5000;
+// const SCALE_HSV_TO_RADIUS = 1 / 10;
+const SCALE_HSV_TO_RADIUS = 3;
 
 function resized() {
     var w = document.body.clientWidth;
@@ -115,14 +118,13 @@ function new_image() {
 
 }
 
-function messaged({ data: { points, outputrgba } }) {
+function messaged({ data: { points, outputrgba, weight } }) {
     drawing_context.fillStyle = "#fff";
     drawing_context.fillRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
             y = points[i + 1];
-        drawing_context.moveTo(x + 1.5, y);
-        drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
+
         let index = (i / 2 * 3);
         let [hue, saturation, value] = rgbToHsv(Math.floor(outputrgba[index]), Math.floor(outputrgba[index + 1]), Math.floor(outputrgba[index + 2]));
         let r, g, b;
@@ -132,6 +134,15 @@ function messaged({ data: { points, outputrgba } }) {
             b = value * 255;
         } else {
             [r, g, b] = hsvToRgb(hue, 1., value);
+        }
+        if (bubble) {
+            let radius = (saturation * value + (1 - value)) * SCALE_HSV_TO_RADIUS;
+            // let radius = weight[i] * SCALE_HSV_TO_RADIUS;
+            drawing_context.moveTo(x + radius, y);
+            drawing_context.arc(x, y, radius, 0, 2 * Math.PI);
+        } else {
+            drawing_context.moveTo(x + 1.5, y);
+            drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
         }
         drawing_context.fillStyle = `rgb(${r},${g},${b})`;
         drawing_context.fill();
@@ -155,13 +166,32 @@ function call_worker() {
     return rgba;
 }
 
+let default_src = "./imgs/bell.png";
+
+if (window.location.search != "") {
+    let params = new URLSearchParams(window.location.search);
+    let temp = params.get("concentration");
+    if (temp != null) {
+        concentration = parseInt(temp);
+    }
+    console.log(params.get("concentration"));
+    temp = params.get("bubble");
+    if (temp != null) {
+        bubble = temp == "true";
+    }
+    temp = params.get("img_url");
+    if (typeof temp === 'string' && temp.length > 0) {
+        default_src = decodeURIComponent(temp);
+    }
+}
+
 image.addEventListener('load', function() {
     let rgba = call_worker();
     //* n is the number of points
-    let n = Math.round(width * height / 160);
+    let n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
     let worker = new Worker('worker.js');
     worker.addEventListener("message", messaged);
-    worker.postMessage({ rgba, width, height, n });
+    worker.postMessage({ rgba, width, height, n, bubble });
     const inputElement = document.getElementById("photo");
     inputElement.addEventListener("change", function handler() {
         var file = inputElement.files[0];
@@ -172,21 +202,40 @@ image.addEventListener('load', function() {
             reader.onloadend = function() {
                 image.src = reader.result;
             }
-            image.onload = function() {
+            image.addEventListener("load", function() {
                 rgba = call_worker();
                 worker.terminate();
-                n = Math.round(width * height / 160);
+                // n = Math.round(width * height / 160);
+                n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
+                console.log(n);
                 // image = this.files[0];
                 worker = new Worker('worker.js');
                 // worker.addEventListener("message", messaged);
-                worker.postMessage({ rgba, width, height, n });
-            }
-
-
+                worker.postMessage({ rgba, width, height, n, bubble });
+            });
         } else {
             image.src = "";
         }
     }, false);
     // worker.postMessage({floatrgba, width, height, n});
 }, false);
-image.src = './imgs/bell.png'; // Set source path
+
+image.setAttribute('crossOrigin', 'anonymous');
+image.src = default_src;
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("point-concentration").addEventListener("change", (e) => {
+        concentration = e.target.value;
+        image.dispatchEvent(new Event("load"));
+        document.getElementById("range-out").value = concentration;
+    });
+    document.getElementById("point-concentration").value = concentration;
+    document.getElementById("range-out").value = concentration;
+
+    document.getElementById("bubble").addEventListener("change", function(e) {
+        bubble = e.target.checked;
+        console.log(bubble)
+        image.dispatchEvent(new Event("load"));
+    });
+    document.getElementById("bubble").checked = bubble;
+});
