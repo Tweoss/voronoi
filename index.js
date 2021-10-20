@@ -105,7 +105,6 @@ var width, height;
 var concentration = 50,
     bubble = false;
 const PIXELS_SQUARE_SCALE = 1 / 5000;
-// const SCALE_HSV_TO_RADIUS = 1 / 10;
 const SCALE_HSV_TO_RADIUS = 3;
 
 function resized() {
@@ -118,7 +117,7 @@ function new_image() {
 
 }
 
-function messaged({ data: { points, outputrgba, weight } }) {
+function messaged({ data: { points, outputrgba } }) {
     drawing_context.fillStyle = "#fff";
     drawing_context.fillRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
@@ -137,7 +136,6 @@ function messaged({ data: { points, outputrgba, weight } }) {
         }
         if (bubble) {
             let radius = (saturation * value + (1 - value)) * SCALE_HSV_TO_RADIUS;
-            // let radius = weight[i] * SCALE_HSV_TO_RADIUS;
             drawing_context.moveTo(x + radius, y);
             drawing_context.arc(x, y, radius, 0, 2 * Math.PI);
         } else {
@@ -164,25 +162,6 @@ function call_worker() {
     context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
     const { data: rgba } = context.getImageData(0, 0, width, height);
     return rgba;
-}
-
-let default_src = "./imgs/bell.png";
-
-if (window.location.search != "") {
-    let params = new URLSearchParams(window.location.search);
-    let temp = params.get("concentration");
-    if (temp != null) {
-        concentration = parseInt(temp);
-    }
-    console.log(params.get("concentration"));
-    temp = params.get("bubble");
-    if (temp != null) {
-        bubble = temp == "true";
-    }
-    temp = params.get("img_url");
-    if (typeof temp === 'string' && temp.length > 0) {
-        default_src = decodeURIComponent(temp);
-    }
 }
 
 image.addEventListener('load', function() {
@@ -219,6 +198,24 @@ image.addEventListener('load', function() {
     }, false);
     // worker.postMessage({floatrgba, width, height, n});
 }, false);
+
+let default_src = "./imgs/bell.png";
+if (window.location.search != "") {
+    let params = new URLSearchParams(window.location.search);
+    let temp = params.get("concentration");
+    if (temp != null) {
+        concentration = parseInt(temp);
+    }
+    console.log(params.get("concentration"));
+    temp = params.get("bubble");
+    if (temp != null) {
+        bubble = temp == "true";
+    }
+    temp = params.get("img_url");
+    if (typeof temp === 'string' && temp.length > 0) {
+        default_src = decodeURIComponent(temp);
+    }
+}
 
 image.setAttribute('crossOrigin', 'anonymous');
 image.src = default_src;
