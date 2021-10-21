@@ -99,6 +99,7 @@ onmessage = event => {
 
     let density = new Float64Array(width * height);
     let outputrgba = new Float64Array(n * 3);
+    let sum_rgba = new Int32Array(n * 3);
     let count_per_cell = new Array(n);
 
     //* set the density at each pixel
@@ -124,7 +125,8 @@ onmessage = event => {
         centroid.fill(0);
         weight.fill(0);
         count_per_cell.fill(0);
-        outputrgba.fill(0);
+        sum_rgba.fill(0);
+        // outputrgba.fill(0);
         for (let y = 0, i = 0; y < height; ++y) {
             for (let x = 0; x < width; ++x) {
                 //* w is the weight (red color) of that pixel
@@ -135,9 +137,12 @@ onmessage = event => {
                 weight[i] += pixelweight;
                 centroid[i * 2] += pixelweight * (x + 0.5);
                 centroid[i * 2 + 1] += pixelweight * (y + 0.5);
-                outputrgba[i * 3] += rgba[(x + y * width) * 4]
-                outputrgba[i * 3 + 1] += rgba[(x + y * width) * 4 + 1]
-                outputrgba[i * 3 + 2] += rgba[(x + y * width) * 4 + 2]
+                sum_rgba[i * 3] += rgba[(x + y * width) * 4]
+                sum_rgba[i * 3 + 1] += rgba[(x + y * width) * 4 + 1]
+                sum_rgba[i * 3 + 2] += rgba[(x + y * width) * 4 + 2]
+                    // outputrgba[i * 3] += rgba[(x + y * width) * 4]
+                    // outputrgba[i * 3 + 1] += rgba[(x + y * width) * 4 + 1]
+                    // outputrgba[i * 3 + 2] += rgba[(x + y * width) * 4 + 2]
                 count_per_cell[i]++;
             }
         }
@@ -158,12 +163,15 @@ onmessage = event => {
             points[i * 2] = x0 + (x1 - x0) * 1.8 + (Math.random() - 0.5) * w;
             points[i * 2 + 1] = y0 + (y1 - y0) * 1.8 + (Math.random() - 0.5) * w;
             //* determine the avg color of the cell
-            outputrgba[i * 3] /= count_per_cell[i];
-            outputrgba[i * 3 + 1] /= count_per_cell[i];
-            outputrgba[i * 3 + 2] /= count_per_cell[i];
+            outputrgba[i * 3] = sum_rgba[i * 3] / count_per_cell[i];
+            outputrgba[i * 3 + 1] = sum_rgba[i * 3 + 1] / count_per_cell[i];
+            outputrgba[i * 3 + 2] = sum_rgba[i * 3 + 2] / count_per_cell[i];
+            // outputrgba[i * 3] /= count_per_cell[i];
+            // outputrgba[i * 3 + 1] /= count_per_cell[i];
+            // outputrgba[i * 3 + 2] /= count_per_cell[i];
         }
 
-        if (k % 10 == 0) {
+        if (k % 1 == 0) {
             postMessage({ points, outputrgba });
         }
         voronoi.update();

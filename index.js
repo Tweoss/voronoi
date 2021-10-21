@@ -110,7 +110,6 @@ const SCALE_HSV_TO_RADIUS = 3;
 var image = new Image();
 
 function messaged({ data: { points, outputrgba } }) {
-    drawing_context.fillStyle = "#fff";
     drawing_context.clearRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
@@ -156,10 +155,11 @@ function call_worker() {
 }
 
 image.addEventListener('load', function() {
+    const worker_path = 'work_test.js';
     let rgba = call_worker();
     //* n is the number of points
     let n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
-    let worker = new Worker('worker.js');
+    let worker = new Worker(worker_path);
     worker.addEventListener("message", messaged);
     worker.postMessage({ rgba, width, height, n, bubble });
     const inputElement = document.getElementById("photo");
@@ -177,7 +177,7 @@ image.addEventListener('load', function() {
                 worker.terminate();
                 n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
                 console.log(n);
-                worker = new Worker('worker.js');
+                worker = new Worker(worker_path);
                 worker.postMessage({ rgba, width, height, n, bubble });
             });
         } else {
