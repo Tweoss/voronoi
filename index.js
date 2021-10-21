@@ -107,15 +107,7 @@ var concentration = 50,
 const PIXELS_SQUARE_SCALE = 1 / 5000;
 const SCALE_HSV_TO_RADIUS = 3;
 
-function resized() {
-    var w = document.body.clientWidth;
-    if (w !== width) width = w;
-}
 var image = new Image();
-
-function new_image() {
-
-}
 
 function messaged({ data: { points, outputrgba } }) {
     drawing_context.fillStyle = "#fff";
@@ -152,7 +144,6 @@ function call_worker() {
     width = document.body.clientWidth;
     height = Math.round(width * image.height / image.width);
     append_canvas();
-    window.addEventListener("resize", resized);
 
     canvas.width = width;
     canvas.height = height;
@@ -184,22 +175,18 @@ image.addEventListener('load', function() {
             image.addEventListener("load", function() {
                 rgba = call_worker();
                 worker.terminate();
-                // n = Math.round(width * height / 160);
                 n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
                 console.log(n);
-                // image = this.files[0];
                 worker = new Worker('worker.js');
-                // worker.addEventListener("message", messaged);
                 worker.postMessage({ rgba, width, height, n, bubble });
             });
         } else {
             image.src = "";
         }
     }, false);
-    // worker.postMessage({floatrgba, width, height, n});
 }, false);
 
-let default_src = "./imgs/bell.png";
+let default_src = "./imgs/IMG_1886.jpg";
 if (window.location.search != "") {
     let params = new URLSearchParams(window.location.search);
     let temp = params.get("concentration");
