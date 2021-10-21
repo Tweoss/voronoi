@@ -111,7 +111,7 @@ var image = new Image();
 
 function messaged({ data: { points, outputrgba } }) {
     drawing_context.fillStyle = "#fff";
-    drawing_context.fillRect(0, 0, width, height);
+    drawing_context.clearRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
             y = points[i + 1];
