@@ -126,7 +126,6 @@ onmessage = event => {
         weight.fill(0);
         count_per_cell.fill(0);
         sum_rgba.fill(0);
-        // outputrgba.fill(0);
         for (let y = 0, i = 0; y < height; ++y) {
             for (let x = 0; x < width; ++x) {
                 //* w is the weight (red color) of that pixel
@@ -140,9 +139,6 @@ onmessage = event => {
                 sum_rgba[i * 3] += rgba[(x + y * width) * 4]
                 sum_rgba[i * 3 + 1] += rgba[(x + y * width) * 4 + 1]
                 sum_rgba[i * 3 + 2] += rgba[(x + y * width) * 4 + 2]
-                    // outputrgba[i * 3] += rgba[(x + y * width) * 4]
-                    // outputrgba[i * 3 + 1] += rgba[(x + y * width) * 4 + 1]
-                    // outputrgba[i * 3 + 2] += rgba[(x + y * width) * 4 + 2]
                 count_per_cell[i]++;
             }
         }
@@ -166,9 +162,6 @@ onmessage = event => {
             outputrgba[i * 3] = sum_rgba[i * 3] / count_per_cell[i];
             outputrgba[i * 3 + 1] = sum_rgba[i * 3 + 1] / count_per_cell[i];
             outputrgba[i * 3 + 2] = sum_rgba[i * 3 + 2] / count_per_cell[i];
-            // outputrgba[i * 3] /= count_per_cell[i];
-            // outputrgba[i * 3 + 1] /= count_per_cell[i];
-            // outputrgba[i * 3 + 2] /= count_per_cell[i];
         }
 
         if (k % 1 == 0) {

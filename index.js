@@ -174,9 +174,9 @@ image.addEventListener('load', function() {
             }
             image.addEventListener("load", function() {
                 rgba = call_worker();
+                worker.removeEventListener("message", messaged);
                 worker.terminate();
                 n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
-                console.log(n);
                 worker = new Worker(worker_path);
                 worker.postMessage({ rgba, width, height, n, bubble });
             });
@@ -193,7 +193,6 @@ if (window.location.search != "") {
     if (temp != null) {
         concentration = parseInt(temp);
     }
-    console.log(params.get("concentration"));
     temp = params.get("bubble");
     if (temp != null) {
         bubble = temp == "true";
@@ -218,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById("bubble").addEventListener("change", function(e) {
         bubble = e.target.checked;
-        console.log(bubble)
         image.dispatchEvent(new Event("load"));
     });
     document.getElementById("bubble").checked = bubble;
