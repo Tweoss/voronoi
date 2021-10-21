@@ -204,7 +204,8 @@ if (window.location.search != "") {
     }
     temp = params.get("trail");
     if (temp != null) {
-        clear_canvas = temp == "true";
+        clear_canvas = temp != "true";
+        console.log(clear_canvas);
     }
     temp = params.get("img_url");
     if (typeof temp === 'string' && temp.length > 0) {
