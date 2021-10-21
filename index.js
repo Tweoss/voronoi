@@ -202,6 +202,10 @@ if (window.location.search != "") {
     if (temp != null) {
         bubble = temp == "true";
     }
+    temp = params.get("trail");
+    if (temp != null) {
+        clear_canvas = temp == "true";
+    }
     temp = params.get("img_url");
     if (typeof temp === 'string' && temp.length > 0) {
         default_src = decodeURIComponent(temp);
