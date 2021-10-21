@@ -155,7 +155,7 @@ function call_worker() {
 }
 
 image.addEventListener('load', function() {
-    const worker_path = 'work_test.js';
+    const worker_path = 'worker.js';
     let rgba = call_worker();
     //* n is the number of points
     let n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
