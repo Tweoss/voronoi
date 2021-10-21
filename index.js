@@ -88,8 +88,8 @@ function hsvToRgb(h, s, v) {
 
 var drawing_canvas = document.createElement("canvas");
 const drawing_context = drawing_canvas.getContext("2d");
-var canvas = document.createElement("canvas");
-const context = canvas.getContext("2d");
+var hidden_canvas = document.createElement("canvas");
+const hidden_context = hidden_canvas.getContext("2d");
 document.body.appendChild(drawing_canvas);
 
 
@@ -103,14 +103,15 @@ function append_canvas() {
 
 var width, height;
 var concentration = 50,
-    bubble = false;
+    bubble = false,
+    clear_canvas = true;
 const PIXELS_SQUARE_SCALE = 1 / 5000;
 const SCALE_HSV_TO_RADIUS = 3;
 
 var image = new Image();
 
 function messaged({ data: { points, outputrgba } }) {
-    drawing_context.clearRect(0, 0, width, height);
+    hidden_context.clearRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
             y = points[i + 1];
@@ -127,16 +128,20 @@ function messaged({ data: { points, outputrgba } }) {
         }
         if (bubble) {
             let radius = (saturation * value + (1 - value)) * SCALE_HSV_TO_RADIUS;
-            drawing_context.moveTo(x + radius, y);
-            drawing_context.arc(x, y, radius, 0, 2 * Math.PI);
+            hidden_context.moveTo(x + radius, y);
+            hidden_context.arc(x, y, radius, 0, 2 * Math.PI);
         } else {
-            drawing_context.moveTo(x + 1.5, y);
-            drawing_context.arc(x, y, 1.5, 0, 2 * Math.PI);
+            hidden_context.moveTo(x + 1.5, y);
+            hidden_context.arc(x, y, 1.5, 0, 2 * Math.PI);
         }
-        drawing_context.fillStyle = `rgb(${r},${g},${b})`;
-        drawing_context.fill();
-        drawing_context.beginPath();
+        hidden_context.fillStyle = `rgb(${r},${g},${b})`;
+        hidden_context.fill();
+        hidden_context.beginPath();
     }
+    if (clear_canvas) {
+        drawing_context.clearRect(0, 0, width, height);
+    }
+    drawing_context.drawImage(hidden_canvas, 0, 0);
 }
 
 function call_worker() {
@@ -144,13 +149,13 @@ function call_worker() {
     height = Math.round(width * image.height / image.width);
     append_canvas();
 
-    canvas.width = width;
-    canvas.height = height;
+    hidden_canvas.width = width;
+    hidden_canvas.height = height;
 
-    canvas.style.width = width + "px";
-    context.scale(1, 1);
-    context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
-    const { data: rgba } = context.getImageData(0, 0, width, height);
+    hidden_canvas.style.width = width + "px";
+    hidden_context.scale(1, 1);
+    hidden_context.drawImage(image, 0, 0, image.width, image.height, 0, 0, width, height);
+    const { data: rgba } = hidden_context.getImageData(0, 0, width, height);
     return rgba;
 }
 
@@ -220,4 +225,10 @@ document.addEventListener("DOMContentLoaded", function() {
         image.dispatchEvent(new Event("load"));
     });
     document.getElementById("bubble").checked = bubble;
+
+    document.getElementById("clear-canvas").addEventListener("change", function(e) {
+        clear_canvas = e.target.checked;
+        image.dispatchEvent(new Event("load"));
+    });
+    document.getElementById("clear-canvas").checked = clear_canvas;
 });
