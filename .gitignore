@@ -1,30 +1,8 @@
-IMG_2319 copy.jpg
-package-lock.json
-package.json
-README.md
 .vscode/launch.json
-node_modules/d3-delaunay/README.md
-node_modules/d3-delaunay/dist/d3-delaunay.min.js
-node_modules/d3-delaunay/src/delaunay.js
-node_modules/d3-delaunay/src/index.js
-node_modules/d3-delaunay/src/path.js
-node_modules/d3-delaunay/src/polygon.js
-node_modules/d3-delaunay/src/voronoi.js
-node_modules/d3-require/LICENSE
-node_modules/d3-require/package.json
-node_modules/d3-require/README.md
-node_modules/d3-require/dist/d3-require.js
-node_modules/d3-require/dist/d3-require.min.js
-node_modules/d3-require/src/index.js
-node_modules/delaunator/delaunator.js
-node_modules/delaunator/delaunator.min.js
-node_modules/delaunator/index.js
-node_modules/delaunator/LICENSE
-node_modules/delaunator/package.json
-node_modules/delaunator/README.md
-image0.jpg
-Screen Shot 2020-12-09 at 12.32.29 PM.png
-imgs/Template_1.png
-.DS_Store
-imgs/IMG_1749.JPG
-imgs/IMG_4334.JPG
+imgs/**
+!imgs/bell.png
+!imgs/IMG_1801.JPG
+!imgs/IMG_1802.JPG
+!imgs/IMG_1886.jpg
+!imgs/IMG_2345.jpeg
+!imgs/obama.png
