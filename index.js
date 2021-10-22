@@ -103,8 +103,8 @@ function append_canvas() {
 
 var width, height;
 var concentration = 50,
-    bubble = false,
-    clear_canvas = true;
+    bubble = true,
+    clear_canvas = false;
 const PIXELS_SQUARE_SCALE = 1 / 5000;
 const SCALE_HSV_TO_RADIUS = 3;
 
