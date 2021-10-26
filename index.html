@@ -18,6 +18,26 @@
             background-color: black;
             color: white;
         }
+        
+        .controlGroup {
+            display: grid;
+            grid-template-columns: [labels] auto [controls] 1fr;
+            grid-gap: .8em;
+            background: #888;
+            padding: 1.2em;
+        }
+        
+        .controlGroup>label {
+            grid-column: labels;
+            grid-row: auto;
+        }
+        
+        .controlGroup>input,
+        .controlGroup>textarea,
+        .controlGroup>button {
+            grid-column: controls;
+            grid-row: auto;
+        }
     </style>
 </head>
 
@@ -25,21 +45,14 @@
     <script src="./index.js"></script>
     <div class="center">
     </div>
-    <div style="text-align:center;">
+    <div style="text-align:center;" class="controlGroup">
         <label for="file">Select another photo to stipple.</label>
-        <br>
         <input name="file" type="file" id="photo" accept="image/*">
-        <br> <br>
-        <label for="concentration">Concentration in dots per 5,000 pixel squared</label>
-        <br>
+        <label for="concentration"><output id="range-out">50</output> dots per 5,000 pixel squared</label>
         <input type="range" id="point-concentration" name="concentration" min="1" max="100" value="50">
-        <output id="range-out">50</output>
-        <br> <br>
         <input type="checkbox" id="bubble" name="bubble">
         <label for="bubble">Turn on variable radius</label>
-        <br> <br>
         <input type="checkbox" id="clear-canvas" name="clear-canvas">
         <label for="clear-canvas">Clear the canvas for each iteration</label>
-        <br> <br>
     </div>
 </body>
