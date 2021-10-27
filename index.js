@@ -92,6 +92,7 @@ var hidden_canvas = document.createElement("canvas");
 const hidden_context = hidden_canvas.getContext("2d");
 document.body.appendChild(drawing_canvas);
 
+let version = 0;
 
 function append_canvas() {
     var dpi = window.devicePixelRatio;
@@ -110,7 +111,8 @@ const SCALE_HSV_TO_RADIUS = 3;
 
 var image = new Image();
 
-function messaged({ data: { points, outputrgba } }) {
+function messaged({ data: { points, outputrgba, worker_version } }) {
+    if (version != worker_version) return;
     hidden_context.clearRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
@@ -159,14 +161,16 @@ function call_worker() {
     return rgba;
 }
 
+const worker_path = 'worker.js';
+let worker = new Worker(worker_path);
 image.addEventListener('load', function() {
-    const worker_path = 'worker.js';
     let rgba = call_worker();
     //* n is the number of points
     let n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
-    let worker = new Worker(worker_path);
+    worker.terminate();
+    worker = new Worker(worker_path);
     worker.addEventListener("message", messaged);
-    worker.postMessage({ rgba, width, height, n, bubble });
+    worker.postMessage({ rgba, width, height, n, bubble, version: version });
     const inputElement = document.getElementById("photo");
     inputElement.addEventListener("change", function handler() {
         var file = inputElement.files[0];
@@ -179,11 +183,11 @@ image.addEventListener('load', function() {
             }
             image.addEventListener("load", function() {
                 rgba = call_worker();
-                worker.removeEventListener("message", messaged);
                 worker.terminate();
+                version += 1;
                 n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
                 worker = new Worker(worker_path);
-                worker.postMessage({ rgba, width, height, n, bubble });
+                worker.postMessage({ rgba, width, height, n, bubble, version: version });
             });
         } else {
             image.src = "";
@@ -205,7 +209,6 @@ if (window.location.search != "") {
     temp = params.get("trail");
     if (temp != null) {
         clear_canvas = temp != "true";
-        console.log(clear_canvas);
     }
     temp = params.get("img_url");
     if (typeof temp === 'string' && temp.length > 0) {
