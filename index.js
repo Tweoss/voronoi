@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById("black-canvas").addEventListener("change", function(e) {
         settings.black_canvas = e.target.checked;
-        restart_and_write_url();
+        write_url();
     });
     document.getElementById("black-canvas").checked = settings.black_canvas;
     drawing_canvas.style.backgroundColor = settings.black_canvas ? "black" : "white";
