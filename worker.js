@@ -88,7 +88,7 @@ function hsvToRgb(h, s, v) {
 importScripts('./static/d3-delaunay.min.js');
 
 onmessage = event => {
-    const { data: { rgba, width, height, n, version } } = event;
+    const { data: { rgba, width, height, n } } = event;
     //* Old centroid of the cell
     const points = new Float64Array(n * 2); //* coordinates of the points
     points.length = n * 2;
@@ -165,7 +165,7 @@ onmessage = event => {
         }
 
         if (k % 1 == 0) {
-            postMessage({ points, outputrgba, worker_version: version });
+            postMessage({ points, outputrgba });
         }
         voronoi.update();
     }

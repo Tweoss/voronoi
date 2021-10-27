@@ -92,8 +92,6 @@ var hidden_canvas = document.createElement("canvas");
 const hidden_context = hidden_canvas.getContext("2d");
 document.body.appendChild(drawing_canvas);
 
-let version = 0;
-
 function append_canvas() {
     var dpi = window.devicePixelRatio;
     drawing_canvas.width = width * dpi;
@@ -103,16 +101,18 @@ function append_canvas() {
 }
 
 var width, height;
-var concentration = 50,
-    bubble = true,
-    clear_canvas = false;
+let settings = {
+    "concentration": 50,
+    "bubble": true,
+    "clear_canvas": false,
+    "url": "./imgs/IMG_1886.jpg"
+}
 const PIXELS_SQUARE_SCALE = 1 / 5000;
 const SCALE_HSV_TO_RADIUS = 3;
 
 var image = new Image();
 
-function messaged({ data: { points, outputrgba, worker_version } }) {
-    if (version != worker_version) return;
+function messaged({ data: { points, outputrgba } }) {
     hidden_context.clearRect(0, 0, width, height);
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
@@ -128,7 +128,7 @@ function messaged({ data: { points, outputrgba, worker_version } }) {
         } else {
             [r, g, b] = hsvToRgb(hue, 1., value);
         }
-        if (bubble) {
+        if (settings.bubble) {
             let radius = (saturation * value + (1 - value)) * SCALE_HSV_TO_RADIUS;
             hidden_context.moveTo(x + radius, y);
             hidden_context.arc(x, y, radius, 0, 2 * Math.PI);
@@ -140,7 +140,7 @@ function messaged({ data: { points, outputrgba, worker_version } }) {
         hidden_context.fill();
         hidden_context.beginPath();
     }
-    if (clear_canvas) {
+    if (settings.clear_canvas) {
         drawing_context.clearRect(0, 0, width, height);
     }
     drawing_context.drawImage(hidden_canvas, 0, 0);
@@ -166,77 +166,72 @@ let worker = new Worker(worker_path);
 image.addEventListener('load', function() {
     let rgba = call_worker();
     //* n is the number of points
-    let n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
+    let n = Math.round(settings.concentration * PIXELS_SQUARE_SCALE * width * height);
     worker.terminate();
     worker = new Worker(worker_path);
     worker.addEventListener("message", messaged);
-    worker.postMessage({ rgba, width, height, n, bubble, version: version });
+    worker.postMessage({ rgba, width, height, n, bubble: settings.bubble });
     const inputElement = document.getElementById("photo");
     inputElement.addEventListener("change", function handler() {
         var file = inputElement.files[0];
         var reader = new FileReader();
         if (file) {
-            this.removeEventListener('load', handler);
             reader.readAsDataURL(file);
+            image.addEventListener("load", function() {
+                rgba = call_worker();
+                n = Math.round(settings.concentration * PIXELS_SQUARE_SCALE * width * height);
+                worker.terminate();
+                worker = new Worker(worker_path);
+                worker.addEventListener("message", messaged);
+                worker.postMessage({ rgba, width, height, n, bubble: settings.bubble });
+            });
             reader.onloadend = function() {
                 image.src = reader.result;
             }
-            image.addEventListener("load", function() {
-                rgba = call_worker();
-                worker.terminate();
-                version += 1;
-                n = Math.round(concentration * PIXELS_SQUARE_SCALE * width * height);
-                worker = new Worker(worker_path);
-                worker.postMessage({ rgba, width, height, n, bubble, version: version });
-            });
         } else {
             image.src = "";
         }
     }, false);
 }, false);
 
-let default_src = "./imgs/IMG_1886.jpg";
 if (window.location.search != "") {
     let params = new URLSearchParams(window.location.search);
-    let temp = params.get("concentration");
-    if (temp != null) {
-        concentration = parseInt(temp);
-    }
-    temp = params.get("bubble");
-    if (temp != null) {
-        bubble = temp == "true";
-    }
-    temp = params.get("trail");
-    if (temp != null) {
-        clear_canvas = temp != "true";
-    }
-    temp = params.get("img_url");
-    if (typeof temp === 'string' && temp.length > 0) {
-        default_src = decodeURIComponent(temp);
-    }
+    params.get("json") ? settings = JSON.parse(atob(decodeURIComponent(params.get("json")))) : false;
 }
 
 image.setAttribute('crossOrigin', 'anonymous');
-image.src = default_src;
+image.src = settings.url;
 
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("point-concentration").addEventListener("change", (e) => {
-        concentration = e.target.value;
+    let restart_and_write_url = () => {
         image.dispatchEvent(new Event("load"));
-        document.getElementById("range-out").value = concentration;
+        document.getElementById("output-url").value = window.location.host + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
+    }
+    document.getElementById("point-concentration").addEventListener("change", (e) => {
+        settings.concentration = e.target.value;
+        document.getElementById("range-out").value = settings.concentration;
+        restart_and_write_url();
     });
-    document.getElementById("point-concentration").value = concentration;
-    document.getElementById("range-out").value = concentration;
+    document.getElementById("point-concentration").value = settings.concentration;
+    document.getElementById("range-out").value = settings.concentration;
 
     document.getElementById("bubble").addEventListener("change", function(e) {
-        bubble = e.target.checked;
-        image.dispatchEvent(new Event("load"));
+        settings.bubble = e.target.checked;
+        restart_and_write_url();
     });
-    document.getElementById("bubble").checked = bubble;
+    document.getElementById("bubble").checked = settings.bubble;
 
     document.getElementById("clear-canvas").addEventListener("change", function(e) {
-        clear_canvas = e.target.checked;
-        image.dispatchEvent(new Event("load"));
+        settings.clear_canvas = e.target.checked;
+        restart_and_write_url();
     });
-    document.getElementById("clear-canvas").checked = clear_canvas;
+    document.getElementById("clear-canvas").checked = settings.clear_canvas;
+
+    document.getElementById("img-url").addEventListener("change", function(e) {
+        settings.url = e.target.value;
+        image.src = settings.url;
+        restart_and_write_url();
+    });
+
+    document.getElementById("output-url").value = window.location.host + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
 });
