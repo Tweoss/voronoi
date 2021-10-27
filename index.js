@@ -233,5 +233,5 @@ document.addEventListener("DOMContentLoaded", function() {
         restart_and_write_url();
     });
 
-    document.getElementById("output-url").value = window.location.host + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
+    document.getElementById("output-url").value = window.location.replace(/\/$/, '') + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
 });
