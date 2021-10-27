@@ -205,7 +205,7 @@ image.src = settings.url;
 document.addEventListener("DOMContentLoaded", function() {
     let restart_and_write_url = () => {
         image.dispatchEvent(new Event("load"));
-        document.getElementById("output-url").value = window.location.host + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
+        document.getElementById("output-url").value = (' ' + window.location).slice(1).replace(/\/$/, '') + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
     }
     document.getElementById("point-concentration").addEventListener("change", (e) => {
         settings.concentration = e.target.value;
