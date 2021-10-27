@@ -38,6 +38,10 @@
             grid-column: controls;
             grid-row: auto;
         }
+        
+        canvas {
+            transition: background-color .5s ease;
+        }
     </style>
 </head>
 
@@ -54,6 +58,8 @@
         <input type="checkbox" id="bubble" name="bubble">
         <label for="clear-canvas">Clear the canvas for each iteration</label>
         <input type="checkbox" id="clear-canvas" name="clear-canvas">
+        <label for="black-canvas">Black background canvas</label>
+        <input type="checkbox" id="black-canvas" name="black-canvas">
         <label for="img-url">Image URL</label>
         <input type="text" id="img-url" name="img-url">
         <label for="output-url">Shareable Link</label>

@@ -105,6 +105,7 @@ let settings = {
     "concentration": 50,
     "bubble": true,
     "clear_canvas": false,
+    "black_canvas": false,
     "url": "./imgs/IMG_1886.jpg"
 }
 const PIXELS_SQUARE_SCALE = 1 / 5000;
@@ -196,16 +197,19 @@ image.addEventListener('load', function() {
 
 if (window.location.search != "") {
     let params = new URLSearchParams(window.location.search);
-    params.get("json") ? settings = JSON.parse(atob(decodeURIComponent(params.get("json")))) : false;
+    params.get("json") ? settings = JSON.parse(atob(params.get("json"))) : false;
 }
 
 image.setAttribute('crossOrigin', 'anonymous');
 image.src = settings.url;
 
 document.addEventListener("DOMContentLoaded", function() {
+    let write_url = () => {
+        document.getElementById("output-url").value = (' ' + window.location.host + window.location.pathname).slice(1).replace(/\/$/, '') + "/?json=" + btoa(JSON.stringify(settings));
+    }
     let restart_and_write_url = () => {
         image.dispatchEvent(new Event("load"));
-        document.getElementById("output-url").value = (' ' + window.location).slice(1).replace(/\/$/, '') + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
+        write_url();
     }
     document.getElementById("point-concentration").addEventListener("change", (e) => {
         settings.concentration = e.target.value;
@@ -227,11 +231,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     document.getElementById("clear-canvas").checked = settings.clear_canvas;
 
+    document.getElementById("black-canvas").addEventListener("change", function(e) {
+        settings.black_canvas = e.target.checked;
+        restart_and_write_url();
+    });
+    document.getElementById("black-canvas").checked = settings.black_canvas;
+    drawing_canvas.style.backgroundColor = settings.black_canvas ? "black" : "white";
+
     document.getElementById("img-url").addEventListener("change", function(e) {
         settings.url = e.target.value;
         image.src = settings.url;
         restart_and_write_url();
     });
+    document.getElementById("img-url").value = settings.url;
 
-    document.getElementById("output-url").value = (' ' + window.location).slice(1).replace(/\/$/, '') + "/?json=" + encodeURIComponent(btoa(JSON.stringify(settings)));
+    write_url();
 });
