@@ -1,3 +1,7 @@
+const formula = (s, v, black_back) => {
+    return black_back ? v * (1 - s) : 1 - v * (1 - s);
+}
+
 /**
  * Converts an RGB color value to HSV. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
@@ -88,7 +92,7 @@ function hsvToRgb(h, s, v) {
 importScripts('./static/d3-delaunay.min.js');
 
 onmessage = event => {
-    const { data: { rgba, width, height, n } } = event;
+    const { data: { rgba, width, height, n, black_canvas: black_background } } = event;
     //* Old centroid of the cell
     const points = new Float64Array(n * 2); //* coordinates of the points
     points.length = n * 2;
@@ -104,8 +108,8 @@ onmessage = event => {
 
     //* set the density at each pixel
     for (let i = 0; i < density.length; i++) {
-        const [, s, v] = rgbToHsv(rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2])
-        density[i] = s * v + (1 - v);
+        const [, s, v] = rgbToHsv(rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2]);
+        density[i] = formula(s, v, black_background);
     }
 
     //* initialize the points using rejection sampling.

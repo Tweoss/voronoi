@@ -1,5 +1,9 @@
 'use strict';
 
+const formula = (s, v, black_back) => {
+    return black_back ? v * (1 - s) : 1 - v * (1 - s);
+}
+
 /**
  * Converts an RGB color value to HSV. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
@@ -130,7 +134,7 @@ function messaged({ data: { points, outputrgba } }) {
             [r, g, b] = hsvToRgb(hue, 1., value);
         }
         if (settings.bubble) {
-            let radius = (saturation * value + (1 - value)) * SCALE_HSV_TO_RADIUS;
+            let radius = formula(saturation, value, settings.black_canvas) * SCALE_HSV_TO_RADIUS;
             hidden_context.moveTo(x + radius, y);
             hidden_context.arc(x, y, radius, 0, 2 * Math.PI);
         } else {
@@ -171,7 +175,7 @@ image.addEventListener('load', function() {
     worker.terminate();
     worker = new Worker(worker_path);
     worker.addEventListener("message", messaged);
-    worker.postMessage({ rgba, width, height, n, bubble: settings.bubble });
+    worker.postMessage({ rgba, width, height, n, black_canvas: settings.black_canvas });
     const inputElement = document.getElementById("photo");
     inputElement.addEventListener("change", function handler() {
         var file = inputElement.files[0];
@@ -234,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("black-canvas").addEventListener("change", function(e) {
         settings.black_canvas = e.target.checked;
         drawing_canvas.style.backgroundColor = settings.black_canvas ? "black" : "white";
-        write_url();
+        restart_and_write_url();
     });
     document.getElementById("black-canvas").checked = settings.black_canvas;
     drawing_canvas.style.backgroundColor = settings.black_canvas ? "black" : "white";
