@@ -113,12 +113,14 @@ let settings = {
     "url": "./imgs/IMG_1886.jpg"
 }
 const PIXELS_SQUARE_SCALE = 1 / 5000;
-const SCALE_HSV_TO_RADIUS = 3;
+const SCALE_HSV_TO_RADIUS = 1.2;
+const PIXEL_RADIUS_SCALE = 0.5;
 
 var image = new Image();
 
 function messaged({ data: { points, outputrgba } }) {
     hidden_context.clearRect(0, 0, width, height);
+    const radius_scale = Math.sqrt(width * height/ (points.length / 2));
     for (let i = 0, n = points.length; i < n; i += 2) {
         let x = points[i],
             y = points[i + 1];
@@ -134,12 +136,12 @@ function messaged({ data: { points, outputrgba } }) {
             [r, g, b] = hsvToRgb(hue, 1., value);
         }
         if (settings.bubble) {
-            let radius = formula(saturation, value, settings.black_canvas) * SCALE_HSV_TO_RADIUS;
+            let radius = formula(saturation, value, settings.black_canvas) * SCALE_HSV_TO_RADIUS * radius_scale * PIXEL_RADIUS_SCALE;
             hidden_context.moveTo(x + radius, y);
             hidden_context.arc(x, y, radius, 0, 2 * Math.PI);
         } else {
-            hidden_context.moveTo(x + 1.5, y);
-            hidden_context.arc(x, y, 1.5, 0, 2 * Math.PI);
+            hidden_context.moveTo(x + radius_scale * PIXEL_RADIUS_SCALE, y);
+            hidden_context.arc(x, y, radius_scale * PIXEL_RADIUS_SCALE, 0, 2 * Math.PI);
         }
         hidden_context.fillStyle = `rgb(${r},${g},${b})`;
         hidden_context.fill();
