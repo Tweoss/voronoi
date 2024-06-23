@@ -251,6 +251,7 @@ document.addEventListener("DOMContentLoaded", function() {
         restart_and_write_url();
     });
     document.getElementById("img-url").value = settings.url;
+    document.getElementById("copy-canvas").addEventListener("click", _ => drawing_canvas.toBlob(blob => {navigator.clipboard.write([new ClipboardItem({'image/png':  blob})]);}));
 
     write_url();
 });
